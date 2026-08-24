@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CheckCircle2, ListChecks, TriangleAlert } from "lucide-react";
+import { Archive, ArchiveRestore, ArrowLeft, CheckCircle2, ListChecks, TriangleAlert } from "lucide-react";
 import { requireUser } from "@/lib/session";
-import { visibleTeamIds } from "@/lib/rbac";
+import { isOrg, visibleTeamIds } from "@/lib/rbac";
 import { db } from "@/lib/db";
 import { dateKey, fmtDateFull, fmtDateShort, monthBounds, timeAgo, todayIST } from "@/lib/time";
 import { cn, pct } from "@/lib/utils";
@@ -17,6 +17,8 @@ import { SegmentBar } from "@/components/ui/progress";
 import { Table, TableWrap, Td, Th, Tr } from "@/components/ui/table";
 import { EmptyState } from "@/components/ui/empty";
 import { buttonClass } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
+import { toggleProjectStatus } from "../new/actions";
 
 export const metadata: Metadata = { title: "Project" };
 
@@ -119,6 +121,22 @@ export default async function ProjectPage({
           <>
             <Badge tone="outline">{project.code}</Badge>
             <StatusBadge status={project.status} />
+            {isOrg(user.role) && (
+              <form action={toggleProjectStatus}>
+                <input type="hidden" name="id" value={project.id} />
+                <SubmitButton variant="outline" size="sm">
+                  {project.status === "ARCHIVED" ? (
+                    <>
+                      <ArchiveRestore className="size-3.5" /> Reactivate
+                    </>
+                  ) : (
+                    <>
+                      <Archive className="size-3.5" /> Archive
+                    </>
+                  )}
+                </SubmitButton>
+              </form>
+            )}
             <Link
               href="/projects"
               className={buttonClass({ variant: "ghost", size: "sm" })}

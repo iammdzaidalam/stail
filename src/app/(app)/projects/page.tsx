@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { FolderKanban } from "lucide-react";
+import { FolderKanban, Plus } from "lucide-react";
 import { requireUser } from "@/lib/session";
+import { isOrg } from "@/lib/rbac";
+import { buttonClass } from "@/components/ui/button";
 import { db } from "@/lib/db";
 import { pct, plural } from "@/lib/utils";
 import { Card, PanelCard } from "@/components/ui/card";
@@ -29,7 +31,8 @@ function HueProgress({ value, hue }: { value: number; hue: number }) {
 }
 
 export default async function ProjectsPage() {
-  await requireUser();
+  const user = await requireUser();
+  const canCreate = isOrg(user.role);
 
   const projects = await db.project.findMany({
     include: {
@@ -79,6 +82,13 @@ export default async function ProjectsPage() {
         eyebrow="Company"
         title="Projects"
         description="Everything STAIL is building, and where the work stands."
+        actions={
+          canCreate ? (
+            <Link href="/projects/new" className={buttonClass({ variant: "accent" })}>
+              <Plus className="size-4" /> New project
+            </Link>
+          ) : undefined
+        }
       />
 
       {/* Portfolio hero */}

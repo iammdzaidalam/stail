@@ -25,7 +25,7 @@ const SORT_ORDER: Record<LiveStatus, number> = {
 };
 
 export default async function TeamLivePage() {
-  const user = await requireUser(["TEAM_LEAD", "MANAGER", "HR", "FOUNDER"]);
+  const user = await requireUser(["TEAM_LEAD", "MANAGER", "HR", "FOUNDER", "SUPER_ADMIN"]);
   const teams = await getVisibleTeams(user);
   const today = todayIST();
 

@@ -19,7 +19,7 @@ export default async function HolidaysPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requireUser(["HR", "FOUNDER"]);
+  await requireUser(["HR", "FOUNDER", "SUPER_ADMIN"]);
   const sp = await searchParams;
   const confirmId = typeof sp.confirm === "string" ? sp.confirm : null;
 

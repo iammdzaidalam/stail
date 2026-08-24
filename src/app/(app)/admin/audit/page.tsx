@@ -56,7 +56,7 @@ export default async function AuditPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requireUser(["HR", "FOUNDER"]);
+  await requireUser(["HR", "FOUNDER", "SUPER_ADMIN"]);
   const sp = await searchParams;
   const actionQ = first(sp.action).trim().slice(0, 100);
   const entityQ = first(sp.entity);

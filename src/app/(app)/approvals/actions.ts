@@ -16,7 +16,7 @@ import {
 import { listDates, minutesBetween } from "@/lib/time";
 import { istDateTime } from "./helpers";
 
-const APPROVER_ROLES = ["TEAM_LEAD", "MANAGER", "HR", "FOUNDER"] as const;
+const APPROVER_ROLES = ["TEAM_LEAD", "MANAGER", "HR", "FOUNDER", "SUPER_ADMIN"] as const;
 
 /**
  * May `viewer` decide a request from `requester`? Self-approval is always

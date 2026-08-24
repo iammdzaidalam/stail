@@ -14,7 +14,7 @@ export async function addHoliday(
   _prev: HolidayState,
   formData: FormData,
 ): Promise<HolidayState> {
-  const actor = await requireUser(["HR", "FOUNDER"]);
+  const actor = await requireUser(["HR", "FOUNDER", "SUPER_ADMIN"]);
 
   const date = String(formData.get("date") ?? "").trim();
   const name = String(formData.get("name") ?? "").trim().slice(0, 120);
@@ -47,7 +47,7 @@ export async function addHoliday(
 
 /** Plain form action for the inline delete button. */
 export async function deleteHoliday(formData: FormData): Promise<void> {
-  const actor = await requireUser(["HR", "FOUNDER"]);
+  const actor = await requireUser(["HR", "FOUNDER", "SUPER_ADMIN"]);
 
   const id = String(formData.get("id") ?? "");
   const holiday = await db.holiday.findUnique({ where: { id } });

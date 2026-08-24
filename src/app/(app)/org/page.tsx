@@ -72,7 +72,7 @@ function HueBar({
 }
 
 export default async function OrgPage() {
-  await requireUser(["MANAGER", "HR", "FOUNDER"]);
+  await requireUser(["MANAGER", "HR", "FOUNDER", "SUPER_ADMIN"]);
 
   const today = todayIST();
   const { start: monthStart } = monthBounds(today);

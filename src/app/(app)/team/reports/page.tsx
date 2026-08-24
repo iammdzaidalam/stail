@@ -57,7 +57,7 @@ export default async function TeamReportsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const user = await requireUser(["TEAM_LEAD", "MANAGER", "HR", "FOUNDER"]);
+  const user = await requireUser(["TEAM_LEAD", "MANAGER", "HR", "FOUNDER", "SUPER_ADMIN"]);
   const sp = await searchParams;
   const teams = await getVisibleTeams(user);
   const today = todayIST();

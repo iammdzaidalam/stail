@@ -66,7 +66,7 @@ export default async function ApprovalsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const user = await requireUser(["TEAM_LEAD", "MANAGER", "HR", "FOUNDER"]);
+  const user = await requireUser(["TEAM_LEAD", "MANAGER", "HR", "FOUNDER", "SUPER_ADMIN"]);
   const sp = await searchParams;
   const tab = sp.tab === "corrections" ? "corrections" : "leave";
   const notice = actionNotice(sp);

@@ -36,7 +36,7 @@ function PanelStat({
 }
 
 export default async function PoliciesPage() {
-  await requireUser(["HR", "FOUNDER"]);
+  await requireUser(["HR", "FOUNDER", "SUPER_ADMIN"]);
   const policy = await getPolicy();
 
   const weekend = [...weekendDaySet(policy)].sort((a, b) => a - b);

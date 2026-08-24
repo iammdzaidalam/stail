@@ -15,7 +15,7 @@ export async function updatePolicy(
   _prev: PolicyState,
   formData: FormData,
 ): Promise<PolicyState> {
-  const actor = await requireUser(["HR", "FOUNDER"]);
+  const actor = await requireUser(["HR", "FOUNDER", "SUPER_ADMIN"]);
 
   const workStart = String(formData.get("workStart") ?? "");
   const workEnd = String(formData.get("workEnd") ?? "");

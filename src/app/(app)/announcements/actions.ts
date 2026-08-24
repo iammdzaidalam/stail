@@ -11,7 +11,7 @@ export async function postAnnouncement(
   _prev: AnnouncementState,
   formData: FormData,
 ): Promise<AnnouncementState> {
-  const user = await requireUser(["HR", "FOUNDER"]);
+  const user = await requireUser(["HR", "FOUNDER", "SUPER_ADMIN"]);
 
   const title = String(formData.get("title") ?? "").trim().slice(0, 140);
   const body = String(formData.get("body") ?? "").trim().slice(0, 4000);
@@ -34,7 +34,7 @@ export async function postAnnouncement(
 }
 
 export async function deleteAnnouncement(formData: FormData): Promise<void> {
-  const user = await requireUser(["HR", "FOUNDER"]);
+  const user = await requireUser(["HR", "FOUNDER", "SUPER_ADMIN"]);
   const id = String(formData.get("id") ?? "");
   const existing = await db.announcement.findUnique({ where: { id } });
   if (!existing) return;

@@ -7,6 +7,7 @@ export const ROLES = [
   "MANAGER",
   "HR",
   "FOUNDER",
+  "SUPER_ADMIN",
 ] as const;
 export type Role = (typeof ROLES)[number];
 
@@ -17,14 +18,29 @@ export const ROLE_LABELS: Record<Role, string> = {
   MANAGER: "Manager",
   HR: "HR",
   FOUNDER: "Founder",
+  SUPER_ADMIN: "Super Admin",
 };
 
 /** Roles that can see beyond their own data (team level and up). */
-export const MANAGERIAL_ROLES: Role[] = ["TEAM_LEAD", "MANAGER", "HR", "FOUNDER"];
+export const MANAGERIAL_ROLES: Role[] = [
+  "TEAM_LEAD",
+  "MANAGER",
+  "HR",
+  "FOUNDER",
+  "SUPER_ADMIN",
+];
 /** Roles with org-wide visibility. */
-export const ORG_ROLES: Role[] = ["MANAGER", "HR", "FOUNDER"];
-/** Roles with administrative powers (people, policies, holidays, audit). */
-export const ADMIN_ROLES: Role[] = ["HR", "FOUNDER"];
+export const ORG_ROLES: Role[] = ["MANAGER", "HR", "FOUNDER", "SUPER_ADMIN"];
+/**
+ * Roles with administrative powers (people, registrations, teams, policies,
+ * holidays, audit). HR and Founder deliberately have the same powers as the
+ * Super Admin — the Super Admin account is simply the protected root account.
+ */
+export const ADMIN_ROLES: Role[] = ["HR", "FOUNDER", "SUPER_ADMIN"];
+
+/** Account lifecycle. Only ACTIVE users can log in. */
+export const USER_STATUSES = ["ACTIVE", "PENDING", "REJECTED", "EXITED"] as const;
+export type UserStatus = (typeof USER_STATUSES)[number];
 
 export const EMPLOYMENT_TYPES = ["FULL_TIME", "INTERN", "CONTRACT"] as const;
 export type EmploymentType = (typeof EMPLOYMENT_TYPES)[number];

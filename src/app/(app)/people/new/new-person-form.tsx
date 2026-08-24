@@ -76,7 +76,7 @@ export function NewPersonForm({
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Role" htmlFor="np-role" hint="Controls what they can see and approve.">
           <Select id="np-role" name="role" defaultValue="EMPLOYEE" required>
-            {ROLES.map((r) => (
+            {ROLES.filter((r) => r !== "SUPER_ADMIN").map((r) => (
               <option key={r} value={r}>
                 {ROLE_LABELS[r]}
               </option>

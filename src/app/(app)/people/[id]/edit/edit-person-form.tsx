@@ -56,7 +56,7 @@ export function EditPersonForm({
           htmlFor="ep-role"
           hint={
             roleLocked
-              ? "Only the founder can change the founder's role."
+              ? "Only the Super Admin can change this account's role."
               : "Controls what they can see and approve."
           }
         >
@@ -67,7 +67,9 @@ export function EditPersonForm({
             disabled={roleLocked}
             required
           >
-            {ROLES.map((r) => (
+            {ROLES.filter(
+              (r) => r !== "SUPER_ADMIN" || person.role === "SUPER_ADMIN",
+            ).map((r) => (
               <option key={r} value={r}>
                 {ROLE_LABELS[r]}
               </option>

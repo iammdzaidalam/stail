@@ -19,7 +19,7 @@ export async function updatePerson(
   _prev: UpdatePersonState,
   formData: FormData,
 ): Promise<UpdatePersonState> {
-  const actor = await requireUser(["HR", "FOUNDER"]);
+  const actor = await requireUser(["HR", "FOUNDER", "SUPER_ADMIN"]);
 
   const id = String(formData.get("id") ?? "");
   const person = await db.user.findUnique({ where: { id } });
@@ -40,16 +40,21 @@ export async function updatePerson(
     return { error: "Choose a valid status." };
   }
 
-  // Founder protection: the whole founder record is only editable by the
-  // founder themself, the Founder role can only be granted by a founder, and
-  // nobody can change their own role.
-  if (person.role === "FOUNDER" && actor.id !== person.id) {
-    return { error: "The founder's profile can only be edited by the founder." };
+  // Protection model: the Super Admin is the root account — only editable by
+  // themself, and the Super Admin role is only grantable by a Super Admin.
+  // HR and Founder otherwise have identical administrative powers. Nobody
+  // else can change their own role (prevents accidental lockouts).
+  if (person.role === "SUPER_ADMIN" && actor.id !== person.id) {
+    return { error: "The Super Admin account can only be edited by the Super Admin." };
   }
-  if (roleInput === "FOUNDER" && actor.role !== "FOUNDER") {
-    return { error: "Only the founder can assign the Founder role." };
+  if (roleInput === "SUPER_ADMIN" && actor.role !== "SUPER_ADMIN") {
+    return { error: "Only the Super Admin can assign the Super Admin role." };
   }
-  if (actor.id === person.id && roleInput !== person.role) {
+  if (
+    actor.id === person.id &&
+    roleInput !== person.role &&
+    actor.role !== "SUPER_ADMIN"
+  ) {
     return { error: "You can't change your own role." };
   }
   const role = roleInput;

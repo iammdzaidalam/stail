@@ -16,7 +16,7 @@ export default async function EditPersonPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const viewer = await requireUser(["HR", "FOUNDER"]);
+  const viewer = await requireUser(["HR", "FOUNDER", "SUPER_ADMIN"]);
   const { id } = await params;
 
   const person = await db.user.findUnique({ where: { id } });
@@ -35,7 +35,7 @@ export default async function EditPersonPage({
     }),
   ]);
 
-  const roleLocked = person.role === "FOUNDER" && viewer.id !== person.id;
+  const roleLocked = person.role === "SUPER_ADMIN" && viewer.id !== person.id;
 
   return (
     <div>

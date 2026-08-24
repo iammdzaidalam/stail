@@ -10,7 +10,7 @@ import { buttonClass } from "@/components/ui/button";
 import { NewPersonForm } from "./new-person-form";
 
 export default async function NewPersonPage() {
-  await requireUser(["HR", "FOUNDER"]);
+  await requireUser(["HR", "FOUNDER", "SUPER_ADMIN"]);
 
   const [teams, managers] = await Promise.all([
     db.team.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),

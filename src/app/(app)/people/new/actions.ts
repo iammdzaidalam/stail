@@ -23,7 +23,7 @@ export async function createPerson(
   _prev: CreatePersonState,
   formData: FormData,
 ): Promise<CreatePersonState> {
-  const actor = await requireUser(["HR", "FOUNDER"]);
+  const actor = await requireUser(["HR", "FOUNDER", "SUPER_ADMIN"]);
 
   const name = String(formData.get("name") ?? "").trim().slice(0, 120);
   const email = String(formData.get("email") ?? "").trim().toLowerCase().slice(0, 200);
@@ -39,8 +39,8 @@ export async function createPerson(
   if (!EMAIL_RE.test(email)) return { error: "Enter a valid email address." };
   if (password.length < 8) return { error: "Temporary password must be at least 8 characters." };
   if (!ROLES.includes(role as Role)) return { error: "Choose a valid role." };
-  if (role === "FOUNDER" && actor.role !== "FOUNDER") {
-    return { error: "Only the founder can create a Founder account." };
+  if (role === "SUPER_ADMIN" && actor.role !== "SUPER_ADMIN") {
+    return { error: "Only the Super Admin can create a Super Admin account." };
   }
   if (!EMPLOYMENT_TYPES.includes(employmentType as EmploymentType)) {
     return { error: "Choose a valid employment type." };

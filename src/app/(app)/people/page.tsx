@@ -38,7 +38,7 @@ export default async function PeoplePage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const viewer = await requireUser(["MANAGER", "HR", "FOUNDER"]);
+  const viewer = await requireUser(["MANAGER", "HR", "FOUNDER", "SUPER_ADMIN"]);
   const sp = await searchParams;
   const q = first(sp.q).trim().slice(0, 100);
   const teamParam = first(sp.team);

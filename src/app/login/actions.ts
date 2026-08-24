@@ -28,12 +28,27 @@ export async function login(
 
   const generic = "Invalid email or password.";
   const user = await db.user.findUnique({ where: { email } });
-  if (!user || user.status !== "ACTIVE") {
+  if (!user) {
     recordLoginFailure(email);
     return { error: generic };
   }
   const ok = await verifyPassword(password, user.passwordHash);
   if (!ok) {
+    recordLoginFailure(email);
+    return { error: generic };
+  }
+  // Only after the password checks out do we reveal account state.
+  if (user.status === "PENDING") {
+    return {
+      error: "Your registration is still awaiting admin approval.",
+    };
+  }
+  if (user.status === "REJECTED") {
+    return {
+      error: "Your registration was declined. Contact People Ops for help.",
+    };
+  }
+  if (user.status !== "ACTIVE") {
     recordLoginFailure(email);
     return { error: generic };
   }

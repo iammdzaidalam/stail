@@ -1,16 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState } from "react";
 import { login, type LoginState } from "./actions";
-
-const DEMO_ACCOUNTS = [
-  { label: "Founder", email: "shivansh@stail.co.in" },
-  { label: "HR", email: "priya@stail.co.in" },
-  { label: "Team Lead", email: "rohan@stail.co.in" },
-  { label: "Employee", email: "ayush@stail.co.in" },
-  { label: "Intern", email: "sahil@stail.co.in" },
-];
-const DEMO_PASSWORD = "stail123";
 
 const underline =
   "w-full rounded-none border-0 border-b border-white/20 bg-transparent px-0 py-2.5 text-sm text-[#f4f3ee] outline-none transition placeholder:text-white/25 focus:border-[#d6f62b]";
@@ -79,26 +71,16 @@ export function LoginForm() {
       {state.error && <p className="text-sm text-[#f2555a]">{state.error}</p>}
 
       <div className="flex items-end justify-between gap-6">
-        <div>
-          <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.2em] text-white/30">
-            Demo access
-          </p>
-          <div className="flex max-w-xs flex-wrap gap-1.5">
-            {DEMO_ACCOUNTS.map((acc) => (
-              <button
-                key={acc.email}
-                type="button"
-                onClick={() => {
-                  setEmail(acc.email);
-                  setPassword(DEMO_PASSWORD);
-                }}
-                className="rounded-full border border-white/15 px-3 py-1 text-[11px] text-white/50 transition hover:border-[#d6f62b]/60 hover:text-[#d6f62b]"
-              >
-                {acc.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        <p className="max-w-xs text-xs leading-relaxed text-white/35">
+          New at STAIL?{" "}
+          <Link
+            href="/register"
+            className="text-white/70 underline decoration-white/30 underline-offset-4 transition hover:text-[#d6f62b]"
+          >
+            Create an account
+          </Link>{" "}
+          — an admin approves it before you can sign in.
+        </p>
 
         <button
           type="submit"

@@ -14,8 +14,7 @@ approvals inbox, and an organization-wide intelligence view for leadership.
 
 - **Next.js 16** (App Router, Server Components, Server Actions, `proxy.ts`)
 - **TypeScript**, **Tailwind CSS v4** (token-driven light/dark theme)
-- **Prisma 7** + SQLite (via `better-sqlite3` driver adapter) — swap the
-  datasource for Postgres when deploying
+- **Prisma 7** + Postgres (via the `@prisma/adapter-pg` driver adapter)
 - Custom JWT session auth (`jose`, httpOnly cookies, bcrypt password hashing)
 - Full RBAC: Intern / Employee / Team Lead / Manager / HR / Founder /
   Super Admin
@@ -24,20 +23,29 @@ approvals inbox, and an organization-wide intelligence view for leadership.
 
 ```bash
 npm install
-cp .env.example .env    # then fill in real values (see below)
-npx prisma db push      # create prisma/dev.db
-npm run db:seed         # create the default policy + the Super Admin account
+cp .env.example .env       # then fill in real values (see below)
+npx prisma migrate deploy  # create the schema
+npm run db:seed            # create the default policy + the Super Admin account
 npm run dev
+```
+
+For local development, any Postgres will do — a Docker one-liner works:
+
+```bash
+docker run -d --name stail-db -e POSTGRES_PASSWORD=stail -p 5432:5432 postgres:16
+# DATABASE_URL="postgresql://postgres:stail@localhost:5432/postgres"
 ```
 
 Set these in `.env` before seeding (never commit real values):
 
-| Variable               | Purpose                                            |
-| ---------------------- | -------------------------------------------------- |
-| `SESSION_SECRET`       | JWT signing secret — `openssl rand -hex 32`        |
-| `SUPER_ADMIN_EMAIL`    | Email of the root account created by `db:seed`     |
-| `SUPER_ADMIN_PASSWORD` | Its initial password — rotate after first login    |
-| `SUPER_ADMIN_NAME`     | Display name for the root account (optional)       |
+| Variable               | Purpose                                             |
+| ---------------------- | --------------------------------------------------- |
+| `DATABASE_URL`         | Pooled Postgres connection string — used at runtime  |
+| `DIRECT_URL`           | Unpooled connection string — used by `prisma migrate`|
+| `SESSION_SECRET`       | JWT signing secret — `openssl rand -hex 32`         |
+| `SUPER_ADMIN_EMAIL`    | Email of the root account created by `db:seed`      |
+| `SUPER_ADMIN_PASSWORD` | Its initial password — rotate after first login     |
+| `SUPER_ADMIN_NAME`     | Display name for the root account (optional)        |
 
 ## How access works (production model)
 
@@ -74,6 +82,40 @@ Super Admin from env.)
 | `/admin/*`        | admins         | Registrations, teams, policy, holidays, audit log       |
 | `/api/export/*`   | managers+      | CSV exports (attendance, tasks)                         |
 
+## Deploying to Vercel
+
+The app is a standard Next.js deployment; the only external dependency is a
+Postgres database. [Neon](https://neon.tech) is a good fit — it is serverless,
+has a free tier, and its pooled endpoint suits Vercel's per-request functions.
+
+1. **Create the database.** In Neon, create a project and copy both connection
+   strings from *Connect*: pooled (host contains `-pooler`) and direct.
+2. **Import the repo** into Vercel. Framework preset: Next.js. The defaults are
+   correct — `npm run build` already runs `prisma generate` and
+   `prisma migrate deploy`, so the schema is applied on every deploy.
+3. **Add the environment variables** below to the Vercel project (Settings →
+   Environment Variables), for Production, Preview and Development.
+4. **Deploy**, then create the root account once, from your machine:
+
+   ```bash
+   DATABASE_URL="<pooled string>" npm run db:seed
+   ```
+
+5. Sign in at `/login` as the Super Admin and rotate the password. Everyone
+   else registers at `/register` and is approved from `/admin/registrations`.
+
+| Variable               | Value                                             |
+| ---------------------- | ------------------------------------------------- |
+| `DATABASE_URL`         | Neon **pooled** connection string                 |
+| `DIRECT_URL`           | Neon **direct** connection string                 |
+| `SESSION_SECRET`       | `openssl rand -hex 32`                            |
+| `SUPER_ADMIN_EMAIL`    | Your admin email                                  |
+| `SUPER_ADMIN_PASSWORD` | A strong initial password                         |
+| `SUPER_ADMIN_NAME`     | Display name (optional)                           |
+
+Preview deployments share the production database unless you point them at a
+separate Neon branch — worth doing before you have real data in there.
+
 ## Conventions
 
 See [DESIGN.md](./DESIGN.md) for the design system, component inventory,
@@ -87,5 +129,4 @@ RBAC rules, and data conventions (IST date keys, server-generated timestamps).
 - Clock in/out timestamps are always server-generated.
 - Login attempts are throttled; sensitive admin/approval mutations are written
   to the audit log with before/after values.
-- Rotate `SESSION_SECRET` and the Super Admin password for production, and
-  move to Postgres before deploying (SQLite is for local/single-node use).
+- Rotate `SESSION_SECRET` and the Super Admin password for production.

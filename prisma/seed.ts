@@ -12,14 +12,14 @@
  */
 import "dotenv/config";
 import bcrypt from "bcryptjs";
-import path from "node:path";
 import { PrismaClient } from "../src/generated/prisma/client";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
 
-const adapter = new PrismaBetterSqlite3({
-  url: `file:${path.join(process.cwd(), "prisma", "dev.db")}`,
-});
-const db = new PrismaClient({ adapter });
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) {
+  throw new Error("DATABASE_URL is not set — see .env.example.");
+}
+const db = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
 
 async function main() {
   const email = process.env.SUPER_ADMIN_EMAIL?.trim().toLowerCase();

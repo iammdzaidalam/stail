@@ -1,4 +1,9 @@
-/* Seed STAIL Workforce OS with a realistic demo organization. */
+/**
+ * DEV ONLY: seed a realistic demo organization (npm run db:seed-demo).
+ * Wipes ALL data first, then re-creates the Super Admin from env so you are
+ * never locked out. Do not run against production data.
+ */
+import "dotenv/config";
 import bcrypt from "bcryptjs";
 import path from "node:path";
 import { PrismaClient } from "../src/generated/prisma/client";
@@ -541,6 +546,26 @@ async function main() {
       { actorId: founder.id, actorName: "Shivansh Rao", action: "announcement.create", entity: "Announcement", createdAt: istDate(addDays(today, -2), hm(11, 0)) },
     ],
   });
+
+  // Re-create the Super Admin root account (wiped above) from env.
+  const rootEmail = process.env.SUPER_ADMIN_EMAIL?.trim().toLowerCase();
+  const rootPassword = process.env.SUPER_ADMIN_PASSWORD;
+  if (rootEmail && rootPassword) {
+    await db.user.create({
+      data: {
+        employeeCode: `STL-${String(code++).padStart(3, "0")}`,
+        name: process.env.SUPER_ADMIN_NAME?.trim() || "Super Admin",
+        email: rootEmail,
+        passwordHash: bcrypt.hashSync(rootPassword, 10),
+        role: "SUPER_ADMIN",
+        title: "Super Admin",
+        status: "ACTIVE",
+        joiningDate: istDate("2024-01-01", hm(10, 0)),
+        avatarHue: 260,
+      },
+    });
+    console.log(`Restored Super Admin ${rootEmail}.`);
+  }
 
   const counts = {
     users: await db.user.count(),

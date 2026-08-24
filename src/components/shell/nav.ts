@@ -12,6 +12,7 @@ import {
   ScrollText,
   Settings2,
   TreePalm,
+  UserPlus,
   Users,
   UsersRound,
   type LucideIcon,
@@ -70,6 +71,13 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Admin",
     items: [
+      {
+        href: "/admin/registrations",
+        label: "Registrations",
+        icon: UserPlus,
+        roles: ADMIN_ROLES,
+      },
+      { href: "/admin/teams", label: "Teams", icon: Users, roles: ADMIN_ROLES },
       { href: "/admin/policies", label: "Policies", icon: Settings2, roles: ADMIN_ROLES },
       {
         href: "/admin/holidays",

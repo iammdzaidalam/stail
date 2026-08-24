@@ -5,8 +5,7 @@ import {
   liveStatus,
 } from "./attendance";
 import { db } from "./db";
-import { isManagerial } from "./rbac";
-import { visibleTeamIds } from "./rbac";
+import { isAdmin, isManagerial, visibleTeamIds } from "./rbac";
 import type { CurrentUser } from "./session";
 import {
   addDays,
@@ -147,6 +146,26 @@ export async function getNotificationsFor(
             ? "You clocked out without a report — it feeds your weekly summary."
             : "Complete it before you clock out.",
         href: "/reports",
+      });
+    }
+  }
+
+  // ---- registrations waiting on admins -----------------------------------
+  if (isAdmin(user.role)) {
+    const pendingRegistrations = await db.user.count({
+      where: { status: "PENDING" },
+    });
+    if (pendingRegistrations > 0) {
+      actions.push({
+        id: "registrations",
+        kind: "action",
+        tone: "accent",
+        icon: "inbox",
+        title: `${pendingRegistrations} ${
+          pendingRegistrations === 1 ? "registration" : "registrations"
+        } awaiting approval`,
+        body: "New people can't sign in until you approve them.",
+        href: "/admin/registrations",
       });
     }
   }

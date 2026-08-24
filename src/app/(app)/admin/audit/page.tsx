@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight, ScrollText, Search } from "lucide-react";
 import { requireUser } from "@/lib/session";
 import { db } from "@/lib/db";
+import type { Prisma } from "@/generated/prisma/client";
 import { dateKey, fmtDateShort, fmtTime, todayIST } from "@/lib/time";
 import { PageHeader } from "@/components/ui/page-header";
 import { StatCard } from "@/components/ui/stat";
@@ -71,8 +72,10 @@ export default async function AuditPage({
   ).map((e) => e.entity);
   const entity = entities.includes(entityQ) ? entityQ : "";
 
-  const where = {
-    ...(actionQ ? { action: { contains: actionQ } } : {}),
+  const where: Prisma.AuditLogWhereInput = {
+    ...(actionQ
+      ? { action: { contains: actionQ, mode: "insensitive" as const } }
+      : {}),
     ...(entity ? { entity } : {}),
   };
 

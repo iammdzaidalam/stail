@@ -51,7 +51,7 @@ export default async function PeoplePage({
     where: {
       ...(statusParam === "all" ? {} : { status: statusParam === "EXITED" ? "EXITED" : "ACTIVE" }),
       ...(validTeam ? { teamId: validTeam } : {}),
-      ...(q ? { name: { contains: q } } : {}),
+      ...(q ? { name: { contains: q, mode: "insensitive" } } : {}),
     },
     include: {
       team: { select: { name: true } },

@@ -114,24 +114,24 @@ export default async function SearchPage({
   const peopleWhere: Prisma.UserWhereInput = {
     status: "ACTIVE",
     OR: [
-      { name: { contains: q } },
-      { email: { contains: q } },
-      { title: { contains: q } },
+      { name: { contains: q, mode: "insensitive" } },
+      { email: { contains: q, mode: "insensitive" } },
+      { title: { contains: q, mode: "insensitive" } },
     ],
   };
-  const teamWhere: Prisma.TeamWhereInput = { name: { contains: q } };
+  const teamWhere: Prisma.TeamWhereInput = { name: { contains: q, mode: "insensitive" } };
   const projectWhere: Prisma.ProjectWhereInput = {
-    OR: [{ name: { contains: q } }, { code: { contains: q } }],
+    OR: [{ name: { contains: q, mode: "insensitive" } }, { code: { contains: q, mode: "insensitive" } }],
   };
   const taskWhere: Prisma.TaskWhereInput = {
     AND: [
-      { OR: [{ title: { contains: q } }, { description: { contains: q } }] },
+      { OR: [{ title: { contains: q, mode: "insensitive" } }, { description: { contains: q, mode: "insensitive" } }] },
       taskScope,
     ],
   };
   const reportWhere: Prisma.DailyReportWhereInput = {
     AND: [
-      { OR: [{ accomplishments: { contains: q } }, { blockers: { contains: q } }] },
+      { OR: [{ accomplishments: { contains: q, mode: "insensitive" } }, { blockers: { contains: q, mode: "insensitive" } }] },
       reportScope,
       // Non-managerial hits land on /reports?tab=history (last 30 days) —
       // don't surface results that destination can't display.

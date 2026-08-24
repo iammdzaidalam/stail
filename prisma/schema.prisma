@@ -1,6 +1,6 @@
 // STAIL Workforce OS — data model
-// SQLite does not support native enums, so enum-like fields are strings
-// constrained by the constants in src/lib/definitions.ts.
+// Enum-like fields are plain strings, constrained by the constants in
+// src/lib/definitions.ts, so their allowed values live in one place.
 
 generator client {
   provider = "prisma-client"
@@ -8,7 +8,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 model User {

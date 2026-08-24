@@ -1,0 +1,237 @@
+// STAIL Workforce OS — data model
+// SQLite does not support native enums, so enum-like fields are strings
+// constrained by the constants in src/lib/definitions.ts.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id             String   @id @default(cuid())
+  employeeCode   String   @unique
+  name           String
+  email          String   @unique
+  passwordHash   String
+  phone          String?
+  role           String // INTERN | EMPLOYEE | TEAM_LEAD | MANAGER | HR | FOUNDER
+  title          String?
+  employmentType String   @default("FULL_TIME") // FULL_TIME | INTERN | CONTRACT
+  status         String   @default("ACTIVE") // ACTIVE | EXITED
+  joiningDate    DateTime
+  avatarHue     Int      @default(200)
+  createdAt      DateTime @default(now())
+
+  teamId    String?
+  team      Team?   @relation("TeamMembers", fields: [teamId], references: [id])
+  managerId String?
+  manager   User?   @relation("Reports", fields: [managerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reports   User[]  @relation("Reports")
+
+  leadsTeams   Team[] @relation("TeamLead")
+  managesTeams Team[] @relation("TeamManager")
+
+  attendances       Attendance[]
+  tasksAssigned     Task[]              @relation("Assignee")
+  tasksCreated      Task[]              @relation("Creator")
+  taskComments      TaskComment[]
+  dailyPlans        DailyPlan[]
+  dailyReports      DailyReport[]
+  leaves            Leave[]             @relation("LeaveUser")
+  leaveDecisions    Leave[]             @relation("LeaveApprover")
+  corrections       CorrectionRequest[] @relation("CorrectionUser")
+  correctionReviews CorrectionRequest[] @relation("CorrectionReviewer")
+  announcements     Announcement[]
+}
+
+model Team {
+  id         String  @id @default(cuid())
+  name       String  @unique
+  department String
+  leadId     String?
+  lead       User?   @relation("TeamLead", fields: [leadId], references: [id])
+  managerId  String?
+  manager    User?   @relation("TeamManager", fields: [managerId], references: [id])
+
+  members  User[]    @relation("TeamMembers")
+  projects Project[]
+  tasks    Task[]
+}
+
+model Project {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  code        String  @unique
+  description String?
+  status      String  @default("ACTIVE") // ACTIVE | PAUSED | ARCHIVED
+  hue         Int     @default(80)
+  teamId      String?
+  team        Team?   @relation(fields: [teamId], references: [id])
+  tasks       Task[]
+}
+
+model Attendance {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  date          String // YYYY-MM-DD in IST
+  clockIn       DateTime?
+  clockOut      DateTime?
+  status        String    @default("ABSENT") // PRESENT | LATE | HALF_DAY | ABSENT | LEAVE | HOLIDAY | WEEKEND
+  mode          String    @default("OFFICE") // OFFICE | REMOTE
+  workSummary   String?
+  totalMinutes  Int?
+  breakMinutes  Int       @default(0)
+  clockInIp     String?
+  clockInDevice String?
+  breaks        Break[]
+
+  @@unique([userId, date])
+  @@index([date])
+}
+
+model Break {
+  id           String     @id @default(cuid())
+  attendanceId String
+  attendance   Attendance @relation(fields: [attendanceId], references: [id], onDelete: Cascade)
+  startedAt    DateTime
+  endedAt      DateTime?
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  assigneeId  String
+  assignee    User      @relation("Assignee", fields: [assigneeId], references: [id])
+  creatorId   String
+  creator     User      @relation("Creator", fields: [creatorId], references: [id])
+  projectId   String?
+  project     Project?  @relation(fields: [projectId], references: [id])
+  teamId      String?
+  team        Team?     @relation(fields: [teamId], references: [id])
+  priority    String    @default("MEDIUM") // LOW | MEDIUM | HIGH | CRITICAL
+  status      String    @default("TODO") // BACKLOG | TODO | IN_PROGRESS | BLOCKED | IN_REVIEW | COMPLETED
+  dueDate     String? // YYYY-MM-DD
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  comments    TaskComment[]
+
+  @@index([assigneeId, status])
+  @@index([projectId])
+}
+
+model TaskComment {
+  id        String   @id @default(cuid())
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  body      String
+  createdAt DateTime @default(now())
+}
+
+model DailyPlan {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  date         String // YYYY-MM-DD
+  priorities   String // newline-separated list
+  deliverables String?
+  submittedAt  DateTime @default(now())
+
+  @@unique([userId, date])
+}
+
+model DailyReport {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  date            String // YYYY-MM-DD
+  accomplishments String
+  pending         String?
+  blockers        String?
+  tomorrowPlan    String?
+  notes           String?
+  submittedAt     DateTime @default(now())
+
+  @@unique([userId, date])
+  @@index([date])
+}
+
+model Leave {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation("LeaveUser", fields: [userId], references: [id])
+  type         String // CASUAL | SICK | EARNED | UNPAID | OTHER
+  startDate    String // YYYY-MM-DD
+  endDate      String // YYYY-MM-DD
+  reason       String
+  status       String    @default("PENDING") // PENDING | APPROVED | REJECTED | CANCELLED
+  approverId   String?
+  approver     User?     @relation("LeaveApprover", fields: [approverId], references: [id])
+  decidedAt    DateTime?
+  decisionNote String?
+  createdAt    DateTime  @default(now())
+}
+
+model Holiday {
+  id   String @id @default(cuid())
+  date String @unique // YYYY-MM-DD
+  name String
+  type String @default("COMPANY") // NATIONAL | COMPANY | OPTIONAL
+}
+
+model Policy {
+  id                    String @id @default("default")
+  workStart             String @default("10:00") // HH:mm IST
+  workEnd               String @default("19:00")
+  graceMinutes          Int    @default(15)
+  halfDayThresholdHours Float  @default(4.5)
+  fullDayHours          Float  @default(8)
+  weekendDays           String @default("0,6") // 0=Sunday .. 6=Saturday
+}
+
+model CorrectionRequest {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation("CorrectionUser", fields: [userId], references: [id])
+  date              String // YYYY-MM-DD
+  requestedClockIn  String? // HH:mm IST
+  requestedClockOut String? // HH:mm IST
+  reason            String
+  status            String    @default("PENDING") // PENDING | APPROVED | REJECTED
+  reviewerId        String?
+  reviewer          User?     @relation("CorrectionReviewer", fields: [reviewerId], references: [id])
+  reviewedAt        DateTime?
+  reviewNote        String?
+  createdAt         DateTime  @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  actorName String
+  action    String
+  entity    String
+  entityId  String?
+  before    String?
+  after     String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  authorId  String?
+  author    User?    @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+}

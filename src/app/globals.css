@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+/* Class-based dark mode (next-themes toggles .dark on <html>) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Design tokens. This is the canonical Tailwind v4 setup: tokens are defined
+   here (v4 has no tailwind.config.js) and everything visual is applied via
+   utility classes in components. */
+:root {
+  --bg: #f2f1ec;
+  --surface: #ffffff;
+  --surface-2: #e8e7df;
+  --ink: #0e0e0c;
+  --ink-soft: #61615a;
+  --ink-faint: #94938a;
+  --line: rgba(14, 14, 12, 0.08);
+  --line-strong: rgba(14, 14, 12, 0.18);
+  --panel: #121211;
+  --panel-ink: #f4f3ee;
+  --panel-soft: #a3a29a;
+  --panel-line: rgba(244, 243, 238, 0.14);
+  --accent: #d6f62b;
+  --accent-ink: #161703;
+  --good: #35935a;
+  --warn: #c8860f;
+  --bad: #dc4046;
+}
+
+.dark {
+  --bg: #0b0b0a;
+  --surface: #151514;
+  --surface-2: #201f1c;
+  --ink: #f2f1ec;
+  --ink-soft: #a3a399;
+  --ink-faint: #6f6f66;
+  --line: rgba(242, 241, 236, 0.09);
+  --line-strong: rgba(242, 241, 236, 0.2);
+  --panel: #f2f1ec;
+  --panel-ink: #0e0e0c;
+  --panel-soft: #55544d;
+  --panel-line: rgba(14, 14, 12, 0.14);
+  --accent: #d6f62b;
+  --accent-ink: #161703;
+  --good: #58bb7e;
+  --warn: #e5a33a;
+  --bad: #f2555a;
+}
+
+/* Inside an inverted panel (PanelCard / .bg-panel) the surface flips relative
+   to the page, so re-point the contextual tokens at their opposite-theme
+   values. Any badge, line, or muted text rendered inside a panel then stays
+   legible in both themes automatically. */
+.bg-panel {
+  /* light theme: panel is dark */
+  --surface-2: rgba(244, 243, 238, 0.12);
+  --ink: #f4f3ee;
+  --ink-soft: #b4b3ab;
+  --ink-faint: #8b8a82;
+  --line: rgba(244, 243, 238, 0.14);
+  --line-strong: rgba(244, 243, 238, 0.3);
+  --good: #58bb7e;
+  --warn: #e5a33a;
+  --bad: #f2555a;
+}
+
+.dark .bg-panel {
+  /* dark theme: panel is light */
+  --surface-2: rgba(14, 14, 12, 0.08);
+  --ink: #0e0e0c;
+  --ink-soft: #55544d;
+  --ink-faint: #7c7b73;
+  --line: rgba(14, 14, 12, 0.14);
+  --line-strong: rgba(14, 14, 12, 0.3);
+  --good: #35935a;
+  --warn: #c8860f;
+  --bad: #dc4046;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-panel: var(--panel);
+  --color-panel-ink: var(--panel-ink);
+  --color-panel-soft: var(--panel-soft);
+  --color-panel-line: var(--panel-line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-good: var(--good);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
